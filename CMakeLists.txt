@@ -1,8 +1,25 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.15)
 project(Syntax)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+option(CESI_STRUCTURAL_TEST_BUILD "Build confirmed structural/profile test core" OFF)
+if(CESI_STRUCTURAL_TEST_BUILD)
+    add_library(Syntax SHARED src/structural_test_core.cpp)
+    target_include_directories(Syntax PRIVATE src include)
+    set_property(TARGET Syntax PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    enable_testing()
+    foreach(test_name data_model_resolver_test offset_profile_bc_test session_profile_reader_test)
+        add_executable(${test_name} tests/native/${test_name}.cpp)
+        target_include_directories(${test_name} PRIVATE src include)
+        if(MSVC)
+            target_compile_options(${test_name} PRIVATE /UNDEBUG)
+        endif()
+        add_test(NAME ${test_name} COMMAND ${test_name})
+    endforeach()
+    return()
+endif()
 
 # Force static linking of VC++ runtime (/MT)
 if(MSVC)
@@ -130,3 +147,22 @@ target_include_directories(Syntax PRIVATE
     ${zstd_SOURCE_DIR}/lib/common
     ${blake3_SOURCE_DIR}/c
 )
+
+include(CTest)
+if(BUILD_TESTING)
+    add_executable(data_model_resolver_test tests/native/data_model_resolver_test.cpp)
+    target_include_directories(data_model_resolver_test PRIVATE src)
+    # Assertions must remain enabled in Release: these are fixture checks.
+    if(MSVC)
+        target_compile_options(data_model_resolver_test PRIVATE /UNDEBUG)
+    else()
+        target_compile_options(data_model_resolver_test PRIVATE -UNDEBUG)
+    endif()
+    add_test(NAME data_model_resolver COMMAND data_model_resolver_test)
+endif()
+
+if(BUILD_TESTING)
+    add_executable(offset_profile_bc_test tests/native/offset_profile_bc_test.cpp)
+    target_include_directories(offset_profile_bc_test PRIVATE include)
+    add_test(NAME offset_profile_bc COMMAND offset_profile_bc_test)
+endif()

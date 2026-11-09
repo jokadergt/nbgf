@@ -1,0 +1,47 @@
+name: Windows structural test build
+on:
+  push:
+    branches: [cesi/windows-test-build]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Compile native DLL
+        shell: pwsh
+        run: |
+          cmake -S . -B artifacts/native -A x64 -DCESI_STRUCTURAL_TEST_BUILD=ON
+          if ($LASTEXITCODE -ne 0) { throw 'Native configuration failed' }
+          cmake --build artifacts/native --config Release --parallel 2
+          if ($LASTEXITCODE -ne 0) { throw 'Native build failed' }
+          ctest --test-dir artifacts/native -C Release --output-on-failure
+          if ($LASTEXITCODE -ne 0) { throw 'Native tests failed' }
+      - name: Check managed logic and native ABI
+        shell: pwsh
+        run: |
+          dotnet run --project tests/Cesi.SmokeTests -c Release -- artifacts/native/Release/Syntax.dll
+          if ($LASTEXITCODE -ne 0) { throw 'Managed or ABI checks failed' }
+      - name: Publish complete Windows app
+        shell: pwsh
+        run: |
+          dotnet publish ui/RblxExecutorUI.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o artifacts/package
+          if ($LASTEXITCODE -ne 0) { throw 'UI publication failed' }
+          Copy-Item artifacts/native/Release/Syntax.dll artifacts/package/Syntax.dll
+          Remove-Item artifacts/package/*.pdb -ErrorAction SilentlyContinue
+          Copy-Item TEST-BUILD.md artifacts/package/LEIA-ME.md
+          $files = Get-ChildItem artifacts/package -File | ForEach-Object { @{ name=$_.Name; sha256=(Get-FileHash $_.FullName -Algorithm SHA256).Hash; bytes=$_.Length } }
+          @{ profile='version-bc1bf755618240e8'; kind='structural-test'; scriptExecutionValidated=$false; files=$files } | ConvertTo-Json -Depth 5 | Set-Content artifacts/package/build-manifest.json -Encoding utf8
+          Compress-Archive -Path artifacts/package/* -DestinationPath artifacts/cesi-windows-test.zip -CompressionLevel Optimal
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cesi-windows-test
+          path: artifacts/cesi-windows-test.zip
+          retention-days: 7
+          if-no-files-found: error

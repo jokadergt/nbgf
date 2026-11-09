@@ -9,12 +9,14 @@ namespace RblxExecutorUI
         private const string DllName = "Syntax.dll";
 
         [DllImport(DllName, CallingConvention = CallingConvention.StdCall)]
+        [return: MarshalAs(UnmanagedType.I1)]
         public static extern bool Initialize();
 
         [DllImport(DllName, CallingConvention = CallingConvention.StdCall)]
         public static extern uint FindRobloxProcess();
 
         [DllImport(DllName, CallingConvention = CallingConvention.StdCall)]
+        [return: MarshalAs(UnmanagedType.I1)]
         public static extern bool Connect(uint pid);
 
         [DllImport(DllName, CallingConvention = CallingConvention.StdCall)]
@@ -32,19 +34,41 @@ namespace RblxExecutorUI
         [DllImport(DllName, CallingConvention = CallingConvention.StdCall)]
         public static extern int GetJobCount();
 
-        [DllImport(DllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
-        public static extern int ExecuteScript([MarshalAs(UnmanagedType.LPStr)] string source, int sourceLen);
+        [DllImport(DllName, EntryPoint = "ExecuteScript", CallingConvention = CallingConvention.StdCall)]
+        private static extern int ExecuteScriptUtf8(byte[] source, int sourceLen);
+
+        public static int ExecuteScript(string source)
+        {
+            var bytes = ExecutionPayload.Encode(source);
+            return ExecuteScriptUtf8(bytes, bytes.Length);
+        }
+
+        [DllImport(DllName, CallingConvention = CallingConvention.StdCall)]
+        private static extern IntPtr GetCoreOffsetVersion();
+
+        [DllImport(DllName, CallingConvention = CallingConvention.StdCall)]
+        [return: MarshalAs(UnmanagedType.I1)]
+        public static extern bool IsExecutionReady();
+
+        [DllImport(DllName, CallingConvention = CallingConvention.StdCall)]
+        private static extern IntPtr GetCoreExeSha256();
+        public static string GetExpectedExeSha256() => Marshal.PtrToStringUTF8(GetCoreExeSha256()) ?? "";
+
+        public static string GetOffsetVersion() => Marshal.PtrToStringUTF8(GetCoreOffsetVersion()) ?? "";
 
         [DllImport(DllName, CallingConvention = CallingConvention.StdCall)]
         private static extern int GetLastExecError(StringBuilder buffer, int bufLen);
 
         [DllImport(DllName, CallingConvention = CallingConvention.StdCall)]
+        [return: MarshalAs(UnmanagedType.I1)]
         public static extern bool ReadMemory(UIntPtr address, IntPtr buffer, UIntPtr size);
 
         [DllImport(DllName, CallingConvention = CallingConvention.StdCall)]
+        [return: MarshalAs(UnmanagedType.I1)]
         public static extern bool WriteMemory(UIntPtr address, IntPtr buffer, UIntPtr size);
 
         [DllImport(DllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [return: MarshalAs(UnmanagedType.I1)]
         public static extern bool GetClientInfo(StringBuilder buffer, int maxSize);
 
         // Helper: get last error message

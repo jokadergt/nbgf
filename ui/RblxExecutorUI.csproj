@@ -8,7 +8,12 @@
     <UseWPF>true</UseWPF>
     <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
-    <AssemblyName>Syntax Executor</AssemblyName>
+    <AssemblyName>cesi</AssemblyName>
+    <RootNamespace>RblxExecutorUI</RootNamespace>
+    <Product>cesi</Product>
+    <Version>1.1.0</Version>
+    <Title>cesi</Title>
+    <ApplicationIcon>Assets/Brand/cesi.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
@@ -17,6 +22,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Lua.xshd" LogicalName="cesi.Lua.xshd"/>
+    <EmbeddedResource Include="Localization/catalog.json" LogicalName="cesi.Localization.json"/>
+    <Resource Include="Assets/Brand/*.png" />
+    <Resource Include="Assets/Brand/cesi.ico" />
     <None Update="Lua.xshd">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

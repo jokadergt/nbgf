@@ -2,56 +2,37 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
-        Title="Syntax Executor" Height="570" Width="920"
-        Background="Transparent" Foreground="#D1D5DB"
-        WindowStyle="None" AllowsTransparency="True"
+        Title="cesi" Icon="Assets/Brand/cesi.ico" Height="680" Width="1080" MinHeight="570" MinWidth="920"
+        UseLayoutRounding="True" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="HighQuality"
+        Background="Transparent" Foreground="{DynamicResource SilverLight}"
+        WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip"
         WindowStartupLocation="CenterScreen"
         FontFamily="Segoe UI, Inter, sans-serif">
 
     <Window.Resources>
-        <SolidColorBrush x:Key="BgMain" Color="#050507"/>
-        <SolidColorBrush x:Key="BgPanel" Color="#0B0B0F"/>
-        <SolidColorBrush x:Key="BgSidebar" Color="#08080A"/>
-        <SolidColorBrush x:Key="CardBg" Color="#0F0F15"/>
-        <SolidColorBrush x:Key="CardHover" Color="#161620"/>
-        <SolidColorBrush x:Key="SilverText" Color="#666666"/>
-        <SolidColorBrush x:Key="SilverLight" Color="#E5E7EB"/>
-        <SolidColorBrush x:Key="AccentGreen" Color="#00FF88"/>
-        <SolidColorBrush x:Key="AccentBlue" Color="#00A2FF"/>
-        <SolidColorBrush x:Key="AccentDanger" Color="#FF4B4B"/>
-        <SolidColorBrush x:Key="BorderColor" Color="#1E1E26"/>
+      <ResourceDictionary>
+        <ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary Source="Assets/Icons/Lucide.xaml"/>
+            <ResourceDictionary Source="Themes/Dark.xaml"/>
+            <ResourceDictionary Source="Localization/Default.xaml"/>
+        </ResourceDictionary.MergedDictionaries>
         
-        <DropShadowEffect x:Key="NeonGlow" BlurRadius="15" Color="#00FF88" Opacity="0.5" ShadowDepth="0"/>
+        <DropShadowEffect x:Key="NeonGlow" BlurRadius="15" Color="#808080" Opacity="0.5" ShadowDepth="0"/>
 
         <Style x:Key="MyScrollBarThumb" TargetType="{x:Type Thumb}">
-            <Setter Property="Background" Value="#3F3F4E"/>
+            <Setter Property="Background" Value="{DynamicResource BorderColor}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Thumb}">
                         <Border Background="{TemplateBinding Background}" CornerRadius="4" Margin="2"/>
                         <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource AccentBlue}"/>
+                            </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#5B5B6E"/>
+                                <Setter Property="Background" Value="{DynamicResource SilverText}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style TargetType="{x:Type ScrollBar}">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Width" Value="12"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ScrollBar}">
-                        <Grid Background="{TemplateBinding Background}">
-                            <Track x:Name="PART_Track" IsDirectionReversed="True">
-                                <Track.Thumb>
-                                    <Thumb Style="{StaticResource MyScrollBarThumb}"/>
-                                </Track.Thumb>
-                            </Track>
-                        </Grid>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -62,16 +43,16 @@
             <Setter Property="Width" Value="42"/>
             <Setter Property="Margin" Value="0,0,0,6"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#555566"/>
+            <Setter Property="Foreground" Value="{DynamicResource SilverText}"/>
             <Setter Property="GroupName" Value="SidebarGroup"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
                         <Grid>
-                            <Border x:Name="indicator" Width="3" Height="20" Background="#00FF88" CornerRadius="0,2,2,0" HorizontalAlignment="Left" VerticalAlignment="Center" Opacity="0">
+                            <Border x:Name="indicator" Width="3" Height="20" Background="{DynamicResource AccentGreen}" CornerRadius="0,2,2,0" HorizontalAlignment="Left" VerticalAlignment="Center" Opacity="0">
                                 <Border.Effect>
-                                    <DropShadowEffect BlurRadius="8" Color="#00FF88" Opacity="0.7" ShadowDepth="0"/>
+                                    <DropShadowEffect BlurRadius="8" Color="#808080" Opacity="0.7" ShadowDepth="0"/>
                                 </Border.Effect>
                             </Border>
                             <Border x:Name="bg" Background="Transparent" CornerRadius="10" Margin="8,0,8,0">
@@ -79,12 +60,15 @@
                             </Border>
                         </Grid>
                         <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource AccentBlue}"/>
+                            </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="#888899"/>
+                                <Setter Property="Foreground" Value="{DynamicResource SilverText}"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
                                 <Setter TargetName="indicator" Property="Opacity" Value="1"/>
-                                <Setter Property="Foreground" Value="#00FF88"/>
+                                <Setter Property="Foreground" Value="{DynamicResource AccentGreen}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -96,7 +80,7 @@
             <Setter Property="Width" Value="34"/>
             <Setter Property="Height" Value="34"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource SilverText}"/>
+            <Setter Property="Foreground" Value="{DynamicResource SilverText}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
@@ -110,9 +94,12 @@
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource AccentBlue}"/>
+                            </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#15FFFFFF"/>
-                                <Setter Property="Foreground" Value="White"/>
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource CardHover}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource SilverLight}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -139,7 +126,7 @@
         </Style>
 
         <Style x:Key="PlayBtn" TargetType="Button" BasedOn="{StaticResource IconBtn}">
-            <Setter Property="Foreground" Value="#00FF88"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentGreen}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Effect" Value="{StaticResource NeonGlow}"/>
@@ -148,8 +135,8 @@
         </Style>
 
         <Style x:Key="ScriptCard" TargetType="Border">
-            <Setter Property="Background" Value="#0A0A0E"/>
-            <Setter Property="BorderBrush" Value="#1E1E26"/>
+            <Setter Property="Background" Value="{DynamicResource CardBg}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="14"/>
             <Setter Property="Padding" Value="16,18"/>
@@ -160,8 +147,8 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="BorderBrush" Value="#00FF88"/>
-                    <Setter Property="Background" Value="#12121A"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource AccentGreen}"/>
+                    <Setter Property="Background" Value="{DynamicResource CardHover}"/>
                 </Trigger>
                 <EventTrigger RoutedEvent="MouseEnter">
                     <BeginStoryboard>
@@ -188,20 +175,111 @@
             <Setter Property="CornerRadius" Value="16"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="BorderBrush" Value="{StaticResource AccentBlue}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource AccentBlue}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="PreferenceToggle" TargetType="CheckBox">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="{DynamicResource SilverLight}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,8,0,8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="52"/></Grid.ColumnDefinitions>
+                            <ContentPresenter VerticalAlignment="Center" Margin="0,0,20,0"/>
+                            <Border Grid.Column="1" x:Name="Track" Width="44" Height="26" CornerRadius="13" Background="{DynamicResource BorderColor}" VerticalAlignment="Center">
+                                <Ellipse x:Name="Knob" Width="18" Height="18" Fill="{DynamicResource SilverLight}" HorizontalAlignment="Left" Margin="4"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Track" Property="Background" Value="{DynamicResource AccentGreen}"/>
+                                <Setter TargetName="Knob" Property="HorizontalAlignment" Value="Right"/>
+                                <Setter TargetName="Knob" Property="Fill" Value="{DynamicResource OnAccent}"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource SilverLight}"/>
+                                <Setter TargetName="Track" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.45"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MacControl" TargetType="Button">
+            <Setter Property="Width" Value="18"/><Setter Property="Height" Value="18"/><Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Foreground" Value="{DynamicResource SilverLight}"/><Setter Property="Background" Value="{DynamicResource CardHover}"/>
+            <Setter Property="FontSize" Value="12"/><Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
+                <Border CornerRadius="9" Background="{TemplateBinding Background}" BorderThickness="1" BorderBrush="{DynamicResource SilverText}">
+                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <ControlTemplate.Triggers><Trigger Property="IsKeyboardFocused" Value="True"><Setter Property="Background" Value="{DynamicResource BorderColor}"/></Trigger></ControlTemplate.Triggers>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="{DynamicResource SilverLight}"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ComboBoxItem">
+                <Border x:Name="ItemBg" Background="Transparent"><ContentPresenter Margin="{TemplateBinding Padding}"/></Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsHighlighted" Value="True"><Setter TargetName="ItemBg" Property="Background" Value="{DynamicResource CardHover}"/></Trigger>
+                    <Trigger Property="IsSelected" Value="True"><Setter TargetName="ItemBg" Property="Background" Value="{DynamicResource CardHover}"/></Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Foreground" Value="{DynamicResource SilverLight}"/><Setter Property="Background" Value="{DynamicResource BgPanel}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/><Setter Property="MinHeight" Value="38"/>
+            <Setter Property="Margin" Value="0,5,0,14"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ComboBox">
+                <Grid>
+                    <ToggleButton Focusable="False" IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                        <ToggleButton.Template><ControlTemplate TargetType="ToggleButton">
+                            <Border Background="{DynamicResource BgPanel}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" CornerRadius="8"/>
+                        </ControlTemplate></ToggleButton.Template>
+                    </ToggleButton>
+                    <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="8" IsHitTestVisible="False"/>
+                    <ContentPresenter Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" Margin="12,8,34,8" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                    <TextBlock Text="⌄" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" IsHitTestVisible="False"/>
+                    <Popup x:Name="PART_Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False">
+                        <Border MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}" Background="{DynamicResource BgPanel}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" CornerRadius="8" Padding="3">
+                            <ScrollViewer MaxHeight="260" CanContentScroll="True"><ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/></ScrollViewer>
+                        </Border>
+                    </Popup>
+                </Grid>
+                <ControlTemplate.Triggers><Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter Property="BorderBrush" Value="{DynamicResource SilverLight}"/></Trigger></ControlTemplate.Triggers>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
+      </ResourceDictionary>
     </Window.Resources>
 
-    <Border Margin="10" Background="{StaticResource BgMain}" CornerRadius="12" ClipToBounds="False" MouseLeftButtonDown="TitleBar_MouseDown">
+    <Border x:Name="OuterFrame" Margin="10" Background="{DynamicResource BgMain}" CornerRadius="20" ClipToBounds="False">
         <Border.Effect>
             <DropShadowEffect Color="Black" BlurRadius="25" ShadowDepth="5" Opacity="0.5" Direction="270"/>
         </Border.Effect>
-        <Border BorderBrush="{StaticResource BorderColor}" BorderThickness="1" CornerRadius="12" ClipToBounds="True">
-            <Grid>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,12,12,0" Panel.ZIndex="10">
-                    <Button Content="—" Foreground="{StaticResource SilverText}" Width="32" Height="32" Background="Transparent" BorderThickness="0" Click="Minimize_Click" Cursor="Hand" FontSize="14" ToolTip="Minimize">
+        <Border x:Name="WindowFrame" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" CornerRadius="20">
+            <Grid x:Name="WindowContentRoot" SizeChanged="WindowContent_SizeChanged">
+                <Grid.RowDefinitions><RowDefinition x:Name="HeaderRow" Height="48"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                <Border Background="{DynamicResource BgPanel}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" MouseLeftButtonDown="TitleBar_MouseDown">
+                    <StackPanel x:Name="HeaderBrand" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="18,0">
+                        <Image x:Name="HeaderLogo" Source="Assets/Brand/cesi-selected.png" Width="30" Height="30"/>
+                        <TextBlock Text="cesi" FontWeight="Bold" FontSize="20" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border x:Name="ConnectedAccountChip" Visibility="Collapsed" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,130,0" Padding="8,4" Background="{DynamicResource CardBg}" CornerRadius="16" Panel.ZIndex="5">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="24" Height="24"><Ellipse.Fill><ImageBrush ImageSource="{Binding Source, ElementName=ClientAvatarImage}" Stretch="UniformToFill"/></Ellipse.Fill></Ellipse>
+                        <TextBlock Text="{Binding Text, ElementName=ClientAccountName}" VerticalAlignment="Center" Margin="8,0,0,0" MaxWidth="130" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                </Border>
+                <StackPanel x:Name="StandardWindowControls" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" Panel.ZIndex="10">
+                    <Button Content="—" Foreground="{DynamicResource SilverText}" Width="32" Height="32" Background="Transparent" BorderThickness="0" Click="Minimize_Click" Cursor="Hand" FontSize="14" ToolTip="{DynamicResource Text.Minimize}">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border x:Name="bg" Background="Transparent" CornerRadius="6">
@@ -209,14 +287,15 @@
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="bg" Property="Background" Value="#222"/>
-                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter TargetName="bg" Property="Background" Value="{DynamicResource CardHover}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource SilverLight}"/>
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
                         </Button.Template>
                     </Button>
-                    <Button Content="✕" Foreground="{StaticResource SilverText}" Width="32" Height="32" Background="Transparent" BorderThickness="0" Click="Close_Click" Cursor="Hand" FontSize="14" Margin="4,0,0,0" ToolTip="Close">
+                    <Button Content="□" Style="{StaticResource IconBtn}" Click="Maximize_Click" ToolTip="{DynamicResource Text.Maximize}"/>
+                    <Button Content="✕" Foreground="{DynamicResource SilverText}" Width="32" Height="32" Background="Transparent" BorderThickness="0" Click="Close_Click" Cursor="Hand" FontSize="14" Margin="4,0,0,0" ToolTip="{DynamicResource Text.Close}">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border x:Name="bg" Background="Transparent" CornerRadius="6">
@@ -224,37 +303,42 @@
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="bg" Property="Background" Value="#E81123"/>
-                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter TargetName="bg" Property="Background" Value="{DynamicResource CardHover}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource SilverLight}"/>
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
                         </Button.Template>
                     </Button>
                 </StackPanel>
+                <StackPanel x:Name="MacWindowControls" Visibility="Collapsed" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="18,0,0,0" Panel.ZIndex="11">
+                    <Button Style="{StaticResource MacControl}" Content="×" Click="Close_Click" ToolTip="{DynamicResource Text.Close}"/>
+                    <Button Style="{StaticResource MacControl}" Content="−" Click="Minimize_Click" ToolTip="{DynamicResource Text.Minimize}"/>
+                    <Button Style="{StaticResource MacControl}" Content="+" Click="Maximize_Click" ToolTip="{DynamicResource Text.Maximize}"/>
+                </StackPanel>
 
-                <Grid>
+                <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="70"/>
+                        <ColumnDefinition x:Name="SidebarColumn" Width="70"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Border Background="{StaticResource BgSidebar}" BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,1,0" Padding="0,30,0,0">
+                    <Border Background="{DynamicResource BgSidebar}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,1,0" Padding="0,30,0,0">
                         <Grid>
                             <StackPanel HorizontalAlignment="Center">
-                                <RadioButton Style="{StaticResource SidebarTab}" IsChecked="True" Checked="Tab_Editor" ToolTip="Editor">
-                                    <Path Data="M 4,16 L 12,8 L 4,0 M 14,16 L 20,16" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="2" Stretch="Uniform" Width="18" Height="18" StrokeEndLineCap="Round" StrokeStartLineCap="Round" StrokeLineJoin="Round"/>
+                                <RadioButton Style="{StaticResource SidebarTab}" IsChecked="True" Checked="Tab_Editor" ToolTip="{DynamicResource Text.Editor}">
+                                    <Path Data="{StaticResource Icon.terminal}" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.8" Stretch="Uniform" Width="18" Height="18" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                 </RadioButton>
-                                <RadioButton Style="{StaticResource SidebarTab}" Checked="Tab_ScriptHub" ToolTip="Script Hub">
-                                    <Path Data="M 2,4 L 14,4 M 2,8 L 14,8 M 2,12 L 14,12" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="2" Stretch="Uniform" Width="18" Height="18" StrokeEndLineCap="Round" StrokeStartLineCap="Round"/>
+                                <RadioButton Style="{StaticResource SidebarTab}" Checked="Tab_ScriptHub" ToolTip="{DynamicResource Text.Library}">
+                                    <Path Data="{StaticResource Icon.library}" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.8" Stretch="Uniform" Width="18" Height="18" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                 </RadioButton>
-                                <RadioButton Style="{StaticResource SidebarTab}" Checked="Tab_Clients" ToolTip="Clients">
-                                    <Path Data="M 8,8 A 4,4 0 1,0 8,0 A 4,4 0 1,0 8,8 Z M 0,16 C 0,10 16,10 16,16" Fill="Transparent" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="2" Stretch="Uniform" Width="18" Height="18" StrokeEndLineCap="Round"/>
+                                <RadioButton Style="{StaticResource SidebarTab}" Checked="Tab_Clients" ToolTip="{DynamicResource Text.Clients}">
+                                    <Path Data="{StaticResource Icon.users-round}" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.8" Stretch="Uniform" Width="18" Height="18" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                 </RadioButton>
                             </StackPanel>
 
-                            <RadioButton Style="{StaticResource SidebarTab}" Margin="0,0,0,25" VerticalAlignment="Bottom" Checked="Tab_Settings" ToolTip="Settings">
-                                <Path Data="M 2,4 L 14,4 M 2,8 L 14,8 M 2,12 L 14,12 M 4,2 L 4,6 M 12,6 L 12,10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="2" Stretch="Uniform" Width="18" Height="18" StrokeEndLineCap="Round" StrokeStartLineCap="Round"/>
+                            <RadioButton Style="{StaticResource SidebarTab}" Margin="0,0,0,25" VerticalAlignment="Bottom" Checked="Tab_Settings" ToolTip="{DynamicResource Text.Settings}">
+                                <Path Data="{StaticResource Icon.settings-2}" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.8" Stretch="Uniform" Width="18" Height="18" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                             </RadioButton>
                         </Grid>
                     </Border>
@@ -271,40 +355,47 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             
-                            <Border Grid.Row="0" Background="{StaticResource BgPanel}" BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,0,1">
+                            <Border Grid.Row="0" MouseLeftButtonDown="TitleBar_MouseDown" Background="{DynamicResource BgPanel}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1">
                                 <Grid Margin="25,0">
-                                    <TextBlock Text="S Y N T A X" FontWeight="Black" FontSize="15" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
 
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,85,0">
-                                        <Button Style="{StaticResource PlayBtn}" Click="Execute_Click" ToolTip="Execute Script">
-                                            <Path Data="M 2,0 L 12,7 L 2,14 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Stretch="Uniform" Width="12" Height="14"/>
-                                        </Button>
-                                        <Button Style="{StaticResource IconBtn}" Margin="5,0" Click="Clear_Click" ToolTip="Clear Editor">
-                                            <Path Data="M 2,14 L 6,14 L 14,6 L 10,2 L 2,10 Z M 10,2 L 14,6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.5" Fill="Transparent" Stretch="Uniform" Width="14" Height="14" StrokeLineJoin="Round" StrokeEndLineCap="Round"/>
-                                        </Button>
+                                        <TextBlock Text="{DynamicResource Text.Editor}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource SilverLight}" VerticalAlignment="Center"/>
+                                        <Border x:Name="StreamModeBadge" Visibility="Collapsed" Background="{DynamicResource CardHover}" CornerRadius="8" Padding="8,4" Margin="12,0,0,0" VerticalAlignment="Center">
+                                            <TextBlock Text="STREAM" FontSize="10" Foreground="{DynamicResource SilverLight}"/>
+                                        </Border>
+                                    </StackPanel>
 
-                                        <Border Width="1" Height="18" Background="#333340" Margin="10,0"/>
-
-                                        <Button Style="{StaticResource IconBtn}" Margin="0,0,5,0" Click="Save_Click" ToolTip="Save File">
-                                            <Path Data="M 2,2 L 14,2 L 14,14 L 2,14 Z M 5,2 L 5,6 L 11,6 L 11,2 M 4,14 L 4,9 L 12,9 L 12,14" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.5" Stretch="Uniform" Width="14" Height="14" StrokeLineJoin="Round"/>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0">
+                                        <Button Style="{StaticResource PlayBtn}" IsEnabled="{Binding ExecutionAvailable, RelativeSource={RelativeSource AncestorType=Window}}" Click="Execute_Click" ToolTip="{DynamicResource Text.Run}">
+                                            <Path Data="{StaticResource Icon.play}" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.8" Stretch="Uniform" Width="18" Height="18" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                         </Button>
-                                        <Button Style="{StaticResource IconBtn}" Click="Open_Click" ToolTip="Open File">
-                                            <Path Data="M 1,4 L 6,4 L 8,6 L 15,6 L 15,13 L 1,13 Z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.5" Fill="Transparent" Stretch="Uniform" Width="16" Height="12" StrokeLineJoin="Round"/>
+                                        <Button Style="{StaticResource IconBtn}" Margin="5,0" Click="Clear_Click" ToolTip="{DynamicResource Text.Clear}">
+                                            <Path Data="{StaticResource Icon.eraser}" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.8" Stretch="Uniform" Width="18" Height="18" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                         </Button>
 
-                                        <Border Width="1" Height="18" Background="#333340" Margin="10,0"/>
-                                        <Button Style="{StaticResource IconBtn}" Click="KillRoblox_Click" ToolTip="Kill Process">
-                                            <Path Data="M 2,2 L 14,14 M 14,2 L 2,14" Stroke="{StaticResource AccentDanger}" StrokeThickness="2" Stretch="Uniform" Width="12" Height="12" StrokeEndLineCap="Round" StrokeStartLineCap="Round"/>
+                                        <Border Width="1" Height="18" Background="{DynamicResource BorderColor}" Margin="10,0"/>
+
+                                        <Button Style="{StaticResource IconBtn}" Margin="0,0,5,0" Click="Save_Click" ToolTip="{DynamicResource Text.Save}" AutomationProperties.Name="{DynamicResource Text.Save}">
+                                            <Path Data="{StaticResource Icon.save}" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.8" Stretch="Uniform" Width="18" Height="18" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                        </Button>
+                                        <Button Style="{StaticResource IconBtn}" Click="Open_Click" ToolTip="{DynamicResource Text.Open}" AutomationProperties.Name="{DynamicResource Text.Open}">
+                                            <Path Data="{StaticResource Icon.folder-open}" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.8" Stretch="Uniform" Width="18" Height="18" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                        </Button>
+
+                                        <Border Width="1" Height="18" Background="{DynamicResource BorderColor}" Margin="10,0"/>
+                                        <Button Style="{StaticResource IconBtn}" Click="KillRoblox_Click" ToolTip="{DynamicResource Text.Kill}">
+                                            <Path Data="{StaticResource Icon.x}" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.8" Stretch="Uniform" Width="18" Height="18" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                         </Button>
                                     </StackPanel>
                                 </Grid>
                             </Border>
 
-                            <Border Grid.Row="1" Background="{StaticResource BgMain}">
+                            <Border Grid.Row="1" Background="{DynamicResource BgMain}">
                                 <avalonEdit:TextEditor Name="Editor" 
                                                        FontFamily="Consolas, 'Courier New', monospace" FontSize="14"
-                                                       Background="Transparent" Foreground="{StaticResource SilverLight}"
-                                                       ShowLineNumbers="True" LineNumbersForeground="#3A3A4A" Margin="0" Padding="6,10,10,10">
+                                                       Background="Transparent" Foreground="{DynamicResource SilverLight}"
+                                                       ShowLineNumbers="True" LineNumbersForeground="{DynamicResource SilverText}" Margin="12" Padding="8,14,14,14"
+                                                       HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                                 </avalonEdit:TextEditor>
                             </Border>
                         </Grid>
@@ -312,7 +403,13 @@
                         <Grid x:Name="ViewScriptHub" Grid.Row="0" Visibility="Collapsed">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                 <StackPanel>
-                                    <TextBlock Text="Script Hub" Foreground="White" FontSize="26" FontWeight="Black" Margin="35,35,35,15"/>
+                                    <TextBlock Text="{DynamicResource Text.Library}" Foreground="{DynamicResource SilverLight}" FontSize="26" FontWeight="SemiBold" Margin="35,35,35,8"/>
+                                    <TextBlock Text="{DynamicResource Text.LibraryHelp}" Foreground="{DynamicResource SilverText}" Margin="35,0,35,18"/>
+                                    <TextBox x:Name="ScriptSearch" TextChanged="ScriptSearch_TextChanged" Margin="35,0,35,8" Padding="12,10"
+                                             Background="{DynamicResource CardBg}" Foreground="{DynamicResource SilverLight}"
+                                             BorderBrush="{DynamicResource BorderColor}" ToolTip="{DynamicResource Text.Search}"
+                                             AutomationProperties.Name="Search scripts"/>
+                                    <TextBlock x:Name="LibrarySummary" Foreground="{DynamicResource SilverText}" Margin="35,4,35,0"/>
 
                                     <ItemsControl x:Name="ScriptHubList" Margin="25,10">
                                         <ItemsControl.ItemsPanel>
@@ -324,19 +421,27 @@
                                             <DataTemplate>
                                                 <Border Style="{StaticResource ScriptCard}">
                                                     <Grid>
-                                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                            <Path Data="M 2,2 L 10,2 L 14,6 L 14,14 L 2,14 Z M 10,2 L 10,6 L 14,6" Stroke="{StaticResource AccentBlue}" StrokeThickness="1.5" Stretch="Uniform" Width="16" Height="20" Margin="0,0,15,0" StrokeLineJoin="Round"/>
-                                                            <TextBlock Text="{Binding Name}" Foreground="{StaticResource SilverLight}" FontSize="15" FontWeight="SemiBold"/>
-                                                        </StackPanel>
-                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                                            <Button Style="{StaticResource PlayBtn}" Click="ExecuteScriptHub_Click" Tag="{Binding FullPath}">
-                                                                <Path Data="M 2,0 L 12,7 L 2,14 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Stretch="Uniform" Width="11" Height="14"/>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Grid VerticalAlignment="Center" Margin="0,0,10,0">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="31"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <Path Data="M 2,2 L 10,2 L 14,6 L 14,14 L 2,14 Z M 10,2 L 10,6 L 14,6" Stroke="{DynamicResource AccentBlue}" StrokeThickness="1.5" Stretch="Uniform" Width="16" Height="20" Margin="0,0,15,0" StrokeLineJoin="Round"/>
+                                                            <TextBlock Grid.Column="1" Text="{Binding Name}" TextTrimming="CharacterEllipsis" MaxWidth="180"  Foreground="{DynamicResource SilverLight}" FontSize="15" FontWeight="SemiBold"/>
+                                                        </Grid>
+                                                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                                                            <Button Style="{StaticResource PlayBtn}" IsEnabled="{Binding ExecutionAvailable, RelativeSource={RelativeSource AncestorType=Window}}" Click="ExecuteScriptHub_Click" ToolTip="{DynamicResource Text.Run}" AutomationProperties.Name="{DynamicResource Text.Run}" Tag="{Binding FullPath}">
+                                                                <Path Data="{StaticResource Icon.play}" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.8" Stretch="Uniform" Width="18" Height="18" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                                             </Button>
-                                                            <Button Style="{StaticResource IconBtn}" Click="CopyScriptHub_Click" Tag="{Binding FullPath}">
-                                                                <Path Data="M 4,4 L 10,4 L 10,12 L 4,12 Z M 6,2 L 12,2 L 12,10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.5" Stretch="Uniform" Width="12" Height="14" StrokeLineJoin="Round"/>
+                                                            <Button Style="{StaticResource IconBtn}" Click="CopyScriptHub_Click" ToolTip="{DynamicResource Text.Copy}" AutomationProperties.Name="{DynamicResource Text.Copy}" Tag="{Binding FullPath}">
+                                                                <Path Data="{StaticResource Icon.copy}" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.8" Stretch="Uniform" Width="18" Height="18" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                                             </Button>
-                                                            <Button Style="{StaticResource IconBtn}" Click="DeleteScriptHub_Click" Tag="{Binding FullPath}">
-                                                                <Path Data="M 3,4 L 13,4 M 6,4 L 6,2 L 10,2 L 10,4 M 4,4 L 4,14 L 12,14 L 12,4" Stroke="{StaticResource AccentDanger}" StrokeThickness="1.5" Stretch="Uniform" Width="12" Height="14" StrokeLineJoin="Round"/>
+                                                            <Button Style="{StaticResource IconBtn}" Click="DeleteScriptHub_Click" ToolTip="{DynamicResource Text.Delete}" AutomationProperties.Name="{DynamicResource Text.Delete}" Tag="{Binding FullPath}">
+                                                                <Path Data="{StaticResource Icon.trash}" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.8" Stretch="Uniform" Width="18" Height="18" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                                             </Button>
                                                         </StackPanel>
                                                     </Grid>
@@ -350,19 +455,19 @@
 
                         <Grid x:Name="ViewClients" Grid.Row="0" Visibility="Collapsed">
                             <StackPanel>
-                                <TextBlock Text="Active Clients" Foreground="White" FontSize="26" FontWeight="Black" Margin="35,35,35,15"/>
+                                <TextBlock Text="{DynamicResource Text.Clients}" Foreground="{DynamicResource SilverLight}" FontSize="26" FontWeight="Black" Margin="35,35,35,15"/>
 
                                 <Grid Margin="35,0">
                                     <Border Style="{StaticResource ClientCard}" Width="280" HorizontalAlignment="Left">
                                         <StackPanel>
-                                            <Border Width="75" Height="75" CornerRadius="37.5" Background="#22222E" Margin="0,0,0,20" ClipToBounds="True" BorderBrush="{StaticResource BorderColor}" BorderThickness="1">
-                                                <Image x:Name="ClientAvatarImage" Stretch="UniformToFill">
+                                            <Border Width="75" Height="75" CornerRadius="37.5" Background="{DynamicResource CardBg}" Margin="0,0,0,20" ClipToBounds="True" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                                                <Image x:Name="ClientAvatarImage" Stretch="UniformToFill" AutomationProperties.Name="Connected account avatar">
                                                     <Image.Source>
                                                         <DrawingImage>
                                                             <DrawingImage.Drawing>
                                                                 <GeometryDrawing Brush="Transparent">
                                                                     <GeometryDrawing.Pen>
-                                                                        <Pen Brush="{StaticResource AccentBlue}" Thickness="2" EndLineCap="Round" StartLineCap="Round" LineJoin="Round"/>
+                                                                        <Pen Brush="{DynamicResource AccentBlue}" Thickness="2" EndLineCap="Round" StartLineCap="Round" LineJoin="Round"/>
                                                                     </GeometryDrawing.Pen>
                                                                     <GeometryDrawing.Geometry>
                                                                         <GeometryGroup>
@@ -375,11 +480,11 @@
                                                     </Image.Source>
                                                 </Image>
                                             </Border>
-                                            <TextBlock x:Name="ClientAccountName" Text="LocalPlayer" TextAlignment="Center" FontSize="20" Foreground="{StaticResource SilverLight}" FontWeight="Bold" Margin="0,0,0,5"/>
-                                            <TextBlock x:Name="ClientPidText" Text="PID: None • Place: Unknown" TextAlignment="Center" FontSize="12" Foreground="{StaticResource SilverText}" Margin="0,0,0,20"/>
+                                            <TextBlock x:Name="ClientAccountName" Text="{DynamicResource Text.Disconnected}" TextAlignment="Center" FontSize="20" Foreground="{DynamicResource SilverLight}" FontWeight="Bold" Margin="0,0,0,5"/>
+                                            <TextBlock x:Name="ClientPidText" Text="{DynamicResource Text.Disconnected}" TextAlignment="Center" FontSize="12" Foreground="{DynamicResource SilverText}" Margin="0,0,0,20"/>
 
-                                            <Border Name="ClientBadgeBg" Background="#111116" BorderThickness="1" BorderBrush="#2A2A35" CornerRadius="20" Padding="15,6" HorizontalAlignment="Center">
-                                                <TextBlock x:Name="ClientStatusBadge" Text="NOT ATTACHED" FontSize="11" FontWeight="Bold" Foreground="{StaticResource SilverText}"/>
+                                            <Border Name="ClientBadgeBg" Background="{DynamicResource CardBg}" BorderThickness="1" BorderBrush="{DynamicResource BorderColor}" CornerRadius="20" Padding="15,6" HorizontalAlignment="Center">
+                                                <TextBlock x:Name="ClientStatusBadge" Text="{DynamicResource Text.Disconnected}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SilverText}"/>
                                             </Border>
                                         </StackPanel>
                                     </Border>
@@ -388,87 +493,106 @@
                         </Grid>
 
                         <Grid x:Name="ViewSettings" Grid.Row="0" Visibility="Collapsed">
-                            <StackPanel>
-                                <TextBlock Text="Configuration" Foreground="White" FontSize="26" FontWeight="Black" Margin="35,35,35,15"/>
-
-                                <Border Background="{StaticResource CardBg}" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" CornerRadius="12" Margin="35,5,35,0" Padding="25">
-                                    <StackPanel>
-                                        <TextBlock Text="Developer Controls" Foreground="{StaticResource SilverLight}" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,18"/>
-
-                                        <CheckBox IsChecked="False" Checked="ToggleConsole_Checked" Unchecked="ToggleConsole_Unchecked" Cursor="Hand">
-                                            <CheckBox.Template>
-                                                <ControlTemplate TargetType="CheckBox">
-                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                        <Border x:Name="track" Width="40" Height="22" CornerRadius="11" Background="#1A1A24" BorderBrush="#2A2A35" BorderThickness="1">
-                                                            <Border x:Name="thumb" Width="16" Height="16" CornerRadius="8" Background="#555566" HorizontalAlignment="Left" Margin="2,0,0,0" VerticalAlignment="Center">
-                                                                <Border.RenderTransform>
-                                                                    <TranslateTransform X="0"/>
-                                                                </Border.RenderTransform>
-                                                            </Border>
-                                                        </Border>
-                                                        <TextBlock Text="Debug Console" Foreground="{StaticResource SilverText}" FontSize="13" Margin="12,0,0,0" VerticalAlignment="Center"/>
-                                                    </StackPanel>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsChecked" Value="True">
-                                                            <Setter TargetName="track" Property="Background" Value="#0D3322"/>
-                                                            <Setter TargetName="track" Property="BorderBrush" Value="#00FF88"/>
-                                                            <Setter TargetName="thumb" Property="Background" Value="#00FF88"/>
-                                                            <Setter TargetName="thumb" Property="RenderTransform">
-                                                                <Setter.Value>
-                                                                    <TranslateTransform X="18"/>
-                                                                </Setter.Value>
-                                                            </Setter>
-                                                            <Setter TargetName="thumb" Property="Effect">
-                                                                <Setter.Value>
-                                                                    <DropShadowEffect BlurRadius="6" Color="#00FF88" Opacity="0.6" ShadowDepth="0"/>
-                                                                </Setter.Value>
-                                                            </Setter>
-                                                        </Trigger>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter TargetName="track" Property="BorderBrush" Value="#3A3A45"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </CheckBox.Template>
-                                        </CheckBox>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <StackPanel Margin="35,28,35,24">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,18">
+                                        <Image x:Name="SettingsBrand" Source="Assets/Brand/cesi-selected.png" Width="58" Height="58" AutomationProperties.Name="Capivara cesi"/>
+                                        <TextBlock Text="cesi" FontSize="32" FontWeight="Bold" VerticalAlignment="Center" Margin="12,0,0,0"/>
                                     </StackPanel>
-                                </Border>
-                            </StackPanel>
+                                    <TextBlock Text="{DynamicResource Text.Settings}" Foreground="{DynamicResource SilverLight}" FontSize="26" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                    <TextBlock Text="{DynamicResource Text.Subtitle}" Foreground="{DynamicResource SilverText}" Margin="0,0,0,20"/>
+                                    <Border Style="{StaticResource ScriptCard}" Margin="0,0,0,12" Padding="22,16">
+                                        <StackPanel>
+                                            <TextBlock Text="{DynamicResource Text.Appearance}" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,16"/>
+                                            <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="20"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                                <StackPanel>
+                                                    <TextBlock Text="{DynamicResource Text.Theme}"/>
+                                                    <ComboBox x:Name="ThemeSelector" SelectionChanged="Appearance_Changed" AutomationProperties.Name="{DynamicResource Text.Theme}">
+                                                        <ComboBoxItem Content="{DynamicResource Text.Dark}"/><ComboBoxItem Content="{DynamicResource Text.Light}"/>
+                                                    </ComboBox>
+                                                    <TextBlock Text="{DynamicResource Text.Window}"/>
+                                                    <ComboBox x:Name="PresetSelector" SelectionChanged="Appearance_Changed" AutomationProperties.Name="{DynamicResource Text.Window}">
+                                                        <ComboBoxItem Content="{DynamicResource Text.Classic}"/><ComboBoxItem Content="{DynamicResource Text.Mac}"/><ComboBoxItem Content="{DynamicResource Text.Compact}"/>
+                                                    </ComboBox>
+                                                    <TextBlock Text="{DynamicResource Text.UiFont}"/>
+                                                    <ComboBox x:Name="UiFontSelector" SelectionChanged="Appearance_Changed" AutomationProperties.Name="{DynamicResource Text.UiFont}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="2">
+                                                    <TextBlock Text="{DynamicResource Text.Language}"/>
+                                                    <ComboBox x:Name="LanguageSelector" DisplayMemberPath="Label" SelectedValuePath="Id" SelectionChanged="Appearance_Changed" AutomationProperties.Name="{DynamicResource Text.Language}"/>
+                                                    <TextBlock Text="{DynamicResource Text.CodeFont}"/>
+                                                    <ComboBox x:Name="EditorFontSelector" SelectionChanged="Appearance_Changed" AutomationProperties.Name="{DynamicResource Text.CodeFont}"/>
+                                                    <TextBlock Text="{DynamicResource Text.Preview}"/>
+                                                    <Border Background="{DynamicResource BgPanel}" CornerRadius="8" Padding="12" Margin="0,5,0,14">
+                                                        <TextBlock Text="cesi · Aa Bb Cc · 0123" TextWrapping="Wrap" FontSize="16"/>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource ScriptCard}" Margin="0,0,0,12" Padding="22,16">
+                                        <StackPanel>
+                                            <CheckBox x:Name="AutoInjectToggle" Style="{StaticResource PreferenceToggle}" Checked="Preferences_Changed" Unchecked="Preferences_Changed" AutomationProperties.Name="{DynamicResource Text.Auto}">
+                                                <StackPanel>
+                                                    <TextBlock Text="{DynamicResource Text.Auto}" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{DynamicResource Text.AutoHelp}" FontSize="12" Foreground="{DynamicResource SilverText}" Margin="0,5,0,0" TextWrapping="Wrap"/>
+                                                </StackPanel>
+                                            </CheckBox>
+                                            <Border Height="1" Background="{DynamicResource BorderColor}" Margin="0,12"/>
+                                            <CheckBox x:Name="StreamModeToggle" Style="{StaticResource PreferenceToggle}" Checked="Preferences_Changed" Unchecked="Preferences_Changed" AutomationProperties.Name="{DynamicResource Text.Stream}">
+                                                <StackPanel>
+                                                    <TextBlock Text="{DynamicResource Text.Stream}" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{DynamicResource Text.StreamHelp}" FontSize="12" Foreground="{DynamicResource SilverText}" Margin="0,5,0,0" TextWrapping="Wrap" MaxWidth="560"/>
+                                                </StackPanel>
+                                            </CheckBox>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource ScriptCard}" Margin="0,0,0,12" Padding="22,16">
+                                        <CheckBox x:Name="DebugConsoleToggle" Style="{StaticResource PreferenceToggle}" Checked="ToggleConsole_Checked" Unchecked="ToggleConsole_Unchecked" AutomationProperties.Name="{DynamicResource Text.Debug}">
+                                            <StackPanel>
+                                                <TextBlock Text="{DynamicResource Text.Debug}" FontWeight="SemiBold"/>
+                                                <TextBlock Text="{DynamicResource Text.DebugHelp}" FontSize="12" Foreground="{DynamicResource SilverText}" Margin="0,5,0,0" TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                        </CheckBox>
+                                    </Border>
+                                    <TextBlock x:Name="PreferencesStatus" Text="{DynamicResource Text.Saved}" Foreground="{DynamicResource SilverText}" FontSize="12" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </ScrollViewer>
                         </Grid>
 
-                        <Border Grid.Row="1" Background="#08080C" BorderBrush="{StaticResource BorderColor}" BorderThickness="0,1,0,0" Padding="16,0">
+                        <Border Grid.Row="1" Background="{DynamicResource BgPanel}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0" Padding="16,0">
                             <DockPanel>
                                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
                                     <Ellipse Width="7" Height="7" Margin="0,0,8,0">
                                         <Ellipse.Fill>
                                             <RadialGradientBrush>
-                                                <GradientStop Color="#00FF88" Offset="0"/>
-                                                <GradientStop Color="#00CC66" Offset="1"/>
+                                                <GradientStop Color="#808080" Offset="0"/>
+                                                <GradientStop Color="#808080" Offset="1"/>
                                             </RadialGradientBrush>
                                         </Ellipse.Fill>
                                         <Ellipse.Effect>
-                                            <DropShadowEffect BlurRadius="6" Color="#00FF88" Opacity="0.8" ShadowDepth="0"/>
+                                            <DropShadowEffect BlurRadius="6" Color="#808080" Opacity="0.8" ShadowDepth="0"/>
                                         </Ellipse.Effect>
                                     </Ellipse>
-                                    <TextBlock x:Name="InjectionStatus" Text="Idle" Foreground="#555566" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="InjectionStatus" Text="{DynamicResource Text.Idle}" Foreground="{DynamicResource SilverText}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                 </StackPanel>
 
-                                <Button DockPanel.Dock="Right" HorizontalAlignment="Right" Style="{StaticResource PlayBtn}" Click="Attach_Click" ToolTip="Attach to Roblox">
-                                    <Path Data="M 10,2 L 10,6 L 14,6 L 14,10 M 6,14 L 6,10 L 2,10 L 2,6 M 10,6 L 6,10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.8" Stretch="Uniform" Width="16" Height="16" StrokeEndLineCap="Round" StrokeStartLineCap="Round" StrokeLineJoin="Round"/>
+                                <Button DockPanel.Dock="Right" HorizontalAlignment="Right" Style="{StaticResource PlayBtn}" Click="Attach_Click" ToolTip="{DynamicResource Text.Attach}">
+                                    <Path Data="{StaticResource Icon.plug}" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.8" Stretch="Uniform" Width="18" Height="18" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                                 </Button>
                             </DockPanel>
                         </Border>
                     </Grid>
                 </Grid>
 
-                <Canvas HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,25,50" Panel.ZIndex="100">
-                    <Border x:Name="NotificationBox" Background="{StaticResource BgPanel}" BorderBrush="{StaticResource AccentGreen}" BorderThickness="1" CornerRadius="10" Padding="20,15" MinWidth="220" Visibility="Collapsed" Canvas.Bottom="0" Canvas.Right="0">
+                <Canvas Grid.RowSpan="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,25,50" Panel.ZIndex="100">
+                    <Border x:Name="NotificationBox" Background="{DynamicResource BgPanel}" BorderBrush="{DynamicResource AccentGreen}" BorderThickness="1" CornerRadius="10" Padding="20,15" MinWidth="220" Visibility="Collapsed" Canvas.Bottom="0" Canvas.Right="0">
                         <Border.Effect>
                             <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="4" Opacity="0.4"/>
                         </Border.Effect>
                         <StackPanel Orientation="Horizontal">
-                            <Path x:Name="NotificationIcon" Data="M 8,2 A 6,6 0 1 1 7.9,2.1 Z M 6,8 L 8,10 L 12,5" Stroke="{StaticResource AccentGreen}" StrokeThickness="2" Stretch="Uniform" Width="18" Height="18" Margin="0,0,15,0" StrokeEndLineCap="Round" StrokeStartLineCap="Round" StrokeLineJoin="Round"/>
-                            <TextBlock x:Name="NotificationText" Text="Notification" Foreground="White" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            <Path x:Name="NotificationIcon" Data="M 8,2 A 6,6 0 1 1 7.9,2.1 Z M 6,8 L 8,10 L 12,5" Stroke="{DynamicResource AccentGreen}" StrokeThickness="2" Stretch="Uniform" Width="18" Height="18" Margin="0,0,15,0" StrokeEndLineCap="Round" StrokeStartLineCap="Round" StrokeLineJoin="Round"/>
+                            <TextBlock x:Name="NotificationText" Text="{DynamicResource Text.PrivateStatus}" Foreground="{DynamicResource SilverLight}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                 </Canvas>

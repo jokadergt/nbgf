@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="../../ui/Localization/catalog.json" LogicalName="cesi.Localization.json"/>
+    <Compile Include="../../ui/RblxCore.cs" Link="RblxCore.cs"/>
+    <Compile Include="../../ui/ClientProfileService.cs" Link="ClientProfileService.cs"/>
+    <Compile Include="../../ui/ExecutionPayload.cs" Link="ExecutionPayload.cs"/>
+    <Compile Include="../../ui/UiCatalog.cs" Link="UiCatalog.cs"/>
+    <Compile Include="../../ui/AutoInjectSchedule.cs" Link="AutoInjectSchedule.cs"/>
+    <Compile Include="../../ui/UserPreferences.cs" Link="UserPreferences.cs"/>
+  </ItemGroup>
+</Project>

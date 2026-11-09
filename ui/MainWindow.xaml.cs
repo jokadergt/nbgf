@@ -11,6 +11,7 @@ using System.Windows.Media.Animation;
 using ICSharpCode.AvalonEdit.Highlighting;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Xml;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using System.Runtime.InteropServices;
@@ -19,8 +20,8 @@ namespace RblxExecutorUI
 {
     public class ScriptItem
     {
-        public string Name { get; set; }
-        public string FullPath { get; set; }
+        public string Name { get; set; } = "";
+        public string FullPath { get; set; } = "";
     }
 
     public partial class MainWindow : Window
@@ -51,7 +52,10 @@ namespace RblxExecutorUI
             _notificationTimer.Tick += (s, e) => CloseNotification();
 
             ScriptHubList.ItemsSource = ScriptsList;
+            CollectionViewSource.GetDefaultView(ScriptsList).Filter = item =>
+                item is ScriptItem script && script.Name.Contains(ScriptSearch.Text, StringComparison.OrdinalIgnoreCase);
             LoadScriptsFolder();
+            PreviewKeyDown += Workspace_KeyDown;
             
             try 
             {
@@ -65,6 +69,7 @@ namespace RblxExecutorUI
                 }
             } 
             catch { }
+            InitializePreferences();
         }
 
         private void LoadScriptsFolder()
@@ -79,7 +84,8 @@ namespace RblxExecutorUI
 
                 ScriptsList.Clear();
                 var files = Directory.GetFiles(path, "*.*")
-                                     .Where(s => s.EndsWith(".lua") || s.EndsWith(".luau") || s.EndsWith(".txt"));
+                                     .Where(s => new[] { ".lua", ".luau", ".txt" }.Contains(Path.GetExtension(s), StringComparer.OrdinalIgnoreCase))
+                                     .OrderBy(s => Path.GetFileName(s), StringComparer.OrdinalIgnoreCase);
 
                 foreach (var file in files)
                 {
@@ -89,6 +95,7 @@ namespace RblxExecutorUI
                         FullPath = file 
                     });
                 }
+                RefreshLibrarySummary();
             }
             catch (Exception ex)
             {
@@ -96,23 +103,40 @@ namespace RblxExecutorUI
             }
         }
 
+        private void ScriptSearch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (ScriptHubList?.ItemsSource == null) return;
+            RefreshLibrarySummary();
+        }
+
+        private void RefreshLibrarySummary()
+        {
+            var view = CollectionViewSource.GetDefaultView(ScriptsList);
+            view.Refresh();
+            int count = view.Cast<ScriptItem>().Count();
+            LibrarySummary.Text = count == 0 ? T("Empty") : string.Format(T("Count"), count);
+        }
+
+        private void Workspace_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (Keyboard.Modifiers != ModifierKeys.Control) return;
+            if (e.Key == Key.S) { Save_Click(sender, e); e.Handled = true; }
+            if (e.Key == Key.O) { Open_Click(sender, e); e.Handled = true; }
+        }
+
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             try
             {
-                var luaDef = HighlightingManager.Instance.GetDefinition("Lua");
-                if (luaDef != null)
-                {
-                    Editor.SyntaxHighlighting = luaDef;
-                }
-                Editor.Text = "-- Syntax Executor Premium\n-- Version: 1.0.0\n\nlocal player = game.Players.LocalPlayer\nprint(\"Hello, \" .. player.Name)";
+                ApplyAppearance();
+                Editor.Text = "-- cesi\n-- Version: 1.0.0\n\nlocal player = game.Players.LocalPlayer\nprint(\"Hello, \" .. player.Name)";
                 
                 InitializeCore();
             }
             catch (Exception ex)
             {
-                InjectionStatus.Text = "INIT ERROR";
-                InjectionStatus.Foreground = Brushes.Orange;
+                InjectionStatus.SetResourceReference(TextBlock.TextProperty, "Text.Error");
+                InjectionStatus.SetResourceReference(TextBlock.ForegroundProperty, "SilverLight");
                 App.LogException(ex, "MainWindow_Loaded");
             }
         }
@@ -121,22 +145,37 @@ namespace RblxExecutorUI
         private void InitializeCore()
         {
             bool init = RblxCore.Initialize();
+            _coreReady = init;
             if (init)
             {
-                InjectionStatus.Text = "NOT ATTACHED";
-                InjectionStatus.Foreground = new SolidColorBrush(Color.FromRgb(142, 142, 142)); // SilverText
+                InjectionStatus.SetResourceReference(TextBlock.TextProperty, "Text.Disconnected");
+                InjectionStatus.SetResourceReference(TextBlock.ForegroundProperty, "SilverLight"); // SilverText
             }
             else
             {
-                InjectionStatus.Text = "SYSCALL FAILED";
-                InjectionStatus.Foreground = Brushes.Red;
+                InjectionStatus.SetResourceReference(TextBlock.TextProperty, "Text.Error");
+                InjectionStatus.SetResourceReference(TextBlock.ForegroundProperty, "SilverLight");
             }
+        }
+
+        // Clip the actual content: Border.CornerRadius alone does not clip children.
+        private void WindowContent_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (sender is not FrameworkElement content || WindowFrame == null) return;
+            UpdateContentClip();
         }
 
         // Window controls
         private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left) DragMove();
+            if (e.ChangedButton != MouseButton.Left) return;
+            if (e.OriginalSource is System.Windows.DependencyObject source)
+            {
+                for (var current = source; current != null; current = current is Visual ? VisualTreeHelper.GetParent(current) : LogicalTreeHelper.GetParent(current))
+                    if (current is System.Windows.Controls.Primitives.ButtonBase) return;
+            }
+            if (e.ClickCount == 2) { Maximize_Click(sender, e); return; }
+            DragMove();
         }
 
         private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
@@ -164,19 +203,20 @@ namespace RblxExecutorUI
         // Notification System
         private void ShowNotification(string message, bool isError = false)
         {
-            NotificationText.Text = message;
+            if (_closed) return;
+            NotificationText.Text = IsStreamMode ? T("PrivateStatus") : LocalizeNotification(message);
             
             if (isError)
             {
-                NotificationBox.BorderBrush = Brushes.OrangeRed;
+                NotificationBox.SetResourceReference(Border.BorderBrushProperty, "SilverLight");
                 NotificationIcon.Data = Geometry.Parse("M 2,14 L 14,14 L 8,2 Z M 8,11 L 8,12 M 8,6 L 8,9"); // Alert triangle
-                NotificationIcon.Stroke = Brushes.OrangeRed;
+                NotificationIcon.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, "SilverLight");
             }
             else
             {
-                NotificationBox.BorderBrush = new SolidColorBrush(Color.FromRgb(0, 255, 136)); // AccentGreen
+                NotificationBox.SetResourceReference(Border.BorderBrushProperty, "SilverLight"); // AccentGreen
                 NotificationIcon.Data = Geometry.Parse("M 8,2 A 6,6 0 1 1 7.9,2.1 Z M 6,8 L 8,10 L 12,5"); // Check circle
-                NotificationIcon.Stroke = new SolidColorBrush(Color.FromRgb(0, 255, 136));
+                NotificationIcon.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, "SilverLight");
             }
 
             NotificationBox.Visibility = Visibility.Visible;
@@ -216,7 +256,9 @@ namespace RblxExecutorUI
 
         private void Execute_Click(object sender, RoutedEventArgs e)
         {
-            if (_isExecuting) return;
+            if (_isExecuting || _isAttaching) return;
+            if (_connectedPid == 0) { ShowNotification(T("Disconnected"), true); return; }
+            if (!ExecutionAvailable) { ShowNotification(T("ExecutionPending"), true); return; }
             _isExecuting = true;
             try
             {
@@ -231,7 +273,7 @@ namespace RblxExecutorUI
                 Console.WriteLine($"[C# UI] Executing EDITOR script ({script.Length} chars)...");
                 ShowNotification("Executing Script...", false);
 
-                int result = RblxCore.ExecuteScript(script, script.Length);
+                int result = RblxCore.ExecuteScript(script);
                 e.Handled = true;
 
                 if (result == 0)
@@ -295,31 +337,44 @@ namespace RblxExecutorUI
                 string scriptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Scripts");
                 if (!Directory.Exists(scriptPath)) Directory.CreateDirectory(scriptPath);
                 
-                Process.Start("explorer.exe", scriptPath);
-                ShowNotification("Opened Scripts Folder", false);
+                var dialog = new Microsoft.Win32.OpenFileDialog
+                {
+                    InitialDirectory = scriptPath,
+                    Filter = "Lua Scripts (*.lua;*.luau;*.txt)|*.lua;*.luau;*.txt|All Files (*.*)|*.*"
+                };
+                if (dialog.ShowDialog() == true)
+                {
+                    string content = File.ReadAllText(dialog.FileName);
+                    Editor.Text = content;
+                    Title = IsStreamMode ? "cesi" : $"cesi — {Path.GetFileName(dialog.FileName)}";
+                    ShowNotification("File opened", false);
+                }
             }
             catch (Exception)
             {
-                ShowNotification("Failed to open folder", true);
+                ShowNotification("Failed to open file", true);
             }
         }
 
         private void ExecuteScriptHub_Click(object sender, RoutedEventArgs e)
         {
-            if (_isExecuting) return;
+            if (_isExecuting || _isAttaching) return;
+            if (_connectedPid == 0) { ShowNotification(T("Disconnected"), true); return; }
+            if (!ExecutionAvailable) { ShowNotification(T("ExecutionPending"), true); return; }
             _isExecuting = true;
             try 
             {
                 var btn = sender as Button;
                 if (btn != null && btn.Tag != null)
                 {
-                    string path = btn.Tag.ToString();
+                    string path = btn.Tag.ToString() ?? "";
                     if (File.Exists(path))
                     {
                         string content = File.ReadAllText(path);
                         Console.WriteLine($"[C# UI] Executing HUB script: {Path.GetFileName(path)} ({content.Length} chars)...");
                         ShowNotification($"Executing {Path.GetFileName(path)}...", false);
-                        RblxCore.ExecuteScript(content, content.Length);
+                        int result = RblxCore.ExecuteScript(content);
+                        ShowNotification(result == 0 ? "Executed Successfully!" : $"Error: {RblxCore.GetLastError()}", result != 0);
                         e.Handled = true;
                     }
                 }
@@ -342,7 +397,7 @@ namespace RblxExecutorUI
                 var btn = sender as Button;
                 if (btn != null && btn.Tag != null)
                 {
-                    string path = btn.Tag.ToString();
+                    string path = btn.Tag.ToString() ?? "";
                     if (File.Exists(path))
                     {
                         Clipboard.SetText(File.ReadAllText(path));
@@ -363,7 +418,7 @@ namespace RblxExecutorUI
                 var btn = sender as Button;
                 if (btn != null && btn.Tag != null)
                 {
-                    string path = btn.Tag.ToString();
+                    string path = btn.Tag.ToString() ?? "";
                     if (File.Exists(path))
                     {
                         File.Delete(path);
@@ -391,159 +446,106 @@ namespace RblxExecutorUI
 
         private void StartProcessMonitor(uint pid)
         {
-            var timer = new DispatcherTimer();
+            _processMonitor?.Stop();
+            var timer = _processMonitor = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(3);
             timer.Tick += (s, ev) => 
             {
                 try {
-                    var proc = System.Diagnostics.Process.GetProcessById((int)pid);
+                    using var proc = System.Diagnostics.Process.GetProcessById((int)pid);
                     if (proc.HasExited) throw new Exception();
                 } catch {
                     timer.Stop();
+                    _connectedPid = 0;
+                    ExecutionAvailable = false;
+                    StopClientProfile();
                     // Reset UI
-                    InjectionStatus.Text = "NOT INJECTED";
-                    InjectionStatus.Foreground = Brushes.Red;
-                    ClientPidText.Text = "PID: None | Place: None";
-                    ClientStatusBadge.Text = "READY";
-                    ClientStatusBadge.Foreground = Brushes.White;
-                    ClientBadgeBg.Background = new SolidColorBrush(Color.FromArgb(25, 255, 255, 255));
-                    ClientAccountName.Text = "Not Connected";
-                    ClientAvatarImage.Source = null;
+                    InjectionStatus.SetResourceReference(TextBlock.TextProperty, "Text.Disconnected");
+                    InjectionStatus.SetResourceReference(TextBlock.ForegroundProperty, "SilverLight");
+                    ClientPidText.SetResourceReference(TextBlock.TextProperty, "Text.Disconnected");
+                    ClientStatusBadge.SetResourceReference(TextBlock.TextProperty, "Text.Ready");
+                    ClientStatusBadge.SetResourceReference(TextBlock.ForegroundProperty, "SilverLight");
+                    ClientBadgeBg.SetResourceReference(Border.BackgroundProperty, "CardHover");
+                    ClientAccountName.SetResourceReference(TextBlock.TextProperty, "Text.Disconnected");
+                    // Profile placeholder remains visible until a valid account photo arrives.
                     RblxCore.Disconnect();
                 }
             };
             timer.Start();
         }
 
-        private void StartClientDataPoller(uint pid)
+        private async void Attach_Click(object sender, RoutedEventArgs e) => await AttachClientAsync();
+
+        private async System.Threading.Tasks.Task AttachClientAsync(uint detectedPid = 0)
         {
-            var timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(2);
-            int attempts = 0;
-            
-            timer.Tick += (s, ev) => 
-            {
-                attempts++;
-                if (attempts > 15) {
-                    timer.Stop();
-                    return; // Give up after 30 seconds
-                }
-
-                var sb = new System.Text.StringBuilder(512);
-                if (RblxCore.GetClientInfo(sb, sb.Capacity))
-                {
-                    string body = sb.ToString();
-                    var parts = body.Split('|');
-                    if (parts.Length >= 4 && parts[0] != "Unknown") // Now expects 4 parts (Name, UserId, JobId, PlaceId)
-                    {
-                        timer.Stop(); // Data found, stop polling
-                        
-                        string accountName = parts[0];
-                        string userId = parts[1];
-                        string jobId = parts[2];
-                        string placeId = parts[3];
-
-                        // Run the web requests asynchronously so UI doesn't freeze
-                        System.Threading.Tasks.Task.Run(async () =>
-                        {
-                            string finalPlaceName = $"Place: {placeId}";
-                            try
-                            {
-                                using (var client = new System.Net.Http.HttpClient())
-                                {
-                                    client.DefaultRequestHeaders.Add("User-Agent", "Roblox/WinInet");
-                                    
-                                    // 1. Resolve PlaceId -> Game Name
-                                    if (placeId != "0")
-                                    {
-                                        string apiRes = await client.GetStringAsync($"https://economy.roblox.com/v2/assets/{placeId}/details");
-                                        var match = System.Text.RegularExpressions.Regex.Match(apiRes, "\"Name\"\\s*:\\s*\"([^\"]+)\"");
-                                        if (match.Success) finalPlaceName = match.Groups[1].Value;
-                                    }
-
-                                    // 2. Resolve UserId -> Avatar JSON -> Actual Image URL -> Download Stream
-                                    string avatarMetaUrl = $"https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={userId}&size=150x150&format=Png&isCircular=false";
-                                    string metaRes = await client.GetStringAsync(avatarMetaUrl);
-                                    string actualImgUrl = "";
-                                    
-                                    var imgMatch = System.Text.RegularExpressions.Regex.Match(metaRes, "\"imageUrl\"\\s*:\\s*\"([^\"]+)\"");
-                                    if (imgMatch.Success) actualImgUrl = imgMatch.Groups[1].Value;
-
-                                    byte[] imgBytes = null;
-                                    if (!string.IsNullOrEmpty(actualImgUrl))
-                                    {
-                                        imgBytes = await client.GetByteArrayAsync(actualImgUrl);
-                                    }
-
-                                    Dispatcher.Invoke(() =>
-                                    {
-                                        ClientAccountName.Text = accountName;
-                                        ClientPidText.Text = $"PID: {pid} | {finalPlaceName}";
-
-                                        if (imgBytes != null)
-                                        {
-                                            try
-                                            {
-                                                var bmp = new System.Windows.Media.Imaging.BitmapImage();
-                                                bmp.BeginInit();
-                                                bmp.StreamSource = new System.IO.MemoryStream(imgBytes);
-                                                bmp.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
-                                                bmp.EndInit();
-                                                ClientAvatarImage.Source = bmp;
-                                            }
-                                            catch { }
-                                        }
-                                    });
-                                }
-                            }
-                            catch
-                            {
-                                // Fallback if web request fails
-                                Dispatcher.Invoke(() =>
-                                {
-                                    ClientAccountName.Text = accountName;
-                                    ClientPidText.Text = $"PID: {pid} | Place: {placeId}";
-                                });
-                            }
-                        });
-                    }
-                }
-            };
-            timer.Start();
-        }
-
-        private async void Attach_Click(object sender, RoutedEventArgs e)
-        {
+            if (_closed || !_coreReady || _isAttaching) return;
+            _isAttaching = true;
             try
             {
                 ShowNotification("Attaching to Roblox...", false);
                 await System.Threading.Tasks.Task.Run(() => 
                 {
-                    uint pid = RblxCore.FindRobloxProcess();
+                    uint pid = detectedPid != 0 ? detectedPid : RblxCore.FindRobloxProcess();
                     
+                    if (_closed || pid == _connectedPid) return;
                     if (pid == 0)
                     {
                         Dispatcher.Invoke(() => ShowNotification("Roblox not found!", true));
                         return;
                     }
 
+                    string actualVersion;
+                    string executablePath;
+                    using (var process = Process.GetProcessById((int)pid))
+                    {
+                        executablePath = process.MainModule?.FileName ?? "";
+                        actualVersion = Path.GetDirectoryName(executablePath) is string directory
+                            ? Path.GetFileName(directory) : "unknown";
+                    }
+                    string coreVersion;
+                    try { coreVersion = RblxCore.GetOffsetVersion(); }
+                    catch (EntryPointNotFoundException)
+                    {
+                        Dispatcher.Invoke(() => ShowNotification("Error: Syntax.dll legacy: missing build/version metadata. Rebuild the native core; client: " + actualVersion, true));
+                        return;
+                    }
+                    if (!string.Equals(coreVersion, actualVersion, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Dispatcher.Invoke(() => ShowNotification($"Error: Offset version mismatch. Client: {actualVersion}; core: {coreVersion}", true));
+                        return;
+                    }
+                    string expectedHash = RblxCore.GetExpectedExeSha256();
+                    using (var executable = File.OpenRead(executablePath))
+                    {
+                        string actualHash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(executable));
+                        if (!string.Equals(expectedHash, actualHash, StringComparison.OrdinalIgnoreCase))
+                        {
+                            Dispatcher.Invoke(() => ShowNotification("Error: Roblox executable SHA-256 does not match this core profile", true));
+                            return;
+                        }
+                    }
                     Dispatcher.Invoke(() => ShowNotification($"Connecting to PID {pid}...", false));
                     bool connected = RblxCore.Connect(pid);
+                    bool executionReady = connected && RblxCore.IsExecutionReady();
+                    if (_closed) { if (connected) RblxCore.Disconnect(); return; }
                     
                     Dispatcher.Invoke(() => 
                     {
+                        if (_closed) return;
                         if (connected)
                         {
-                            ShowNotification("Successfully attached to game!", false);
+                            _connectedPid = pid;
+                            ExecutionAvailable = executionReady;
+                            ShowNotification(T(executionReady ? "Connected" : "StructuralConnected"), false);
                             
-                            InjectionStatus.Text = "STABLE";
-                            InjectionStatus.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 136));
+                            InjectionStatus.SetResourceReference(TextBlock.TextProperty, executionReady ? "Text.Connected" : "Text.StructuralConnected");
+                            InjectionStatus.SetResourceReference(TextBlock.ForegroundProperty, "SilverLight");
                             
                             // Update client page
-                            ClientPidText.Text = $"PID: {pid} | Place: Active";
-                            ClientStatusBadge.Text = "ACTIVE SESSION";
-                            ClientStatusBadge.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 136));
-                            ClientBadgeBg.Background = new SolidColorBrush(Color.FromArgb(25, 0, 255, 136)); // 10% opacity
+                            ClientPidText.Text = $"PID: {pid}";
+                            ClientStatusBadge.SetResourceReference(TextBlock.TextProperty, executionReady ? "Text.Connected" : "Text.StructuralConnected");
+                            ClientStatusBadge.SetResourceReference(TextBlock.ForegroundProperty, "SilverLight");
+                            ClientBadgeBg.SetResourceReference(Border.BackgroundProperty, "CardHover"); // 10% opacity
                             
                             // Start native polling and monitors
                             StartClientDataPoller(pid);
@@ -551,9 +553,9 @@ namespace RblxExecutorUI
                         }
                         else
                         {
-                            ShowNotification("Connect failed!", true);
-                            InjectionStatus.Text = "FAILED";
-                            InjectionStatus.Foreground = Brushes.Red;
+                            ShowNotification($"Error: {RblxCore.GetLastError()}", true);
+                            InjectionStatus.SetResourceReference(TextBlock.TextProperty, "Text.Error");
+                            InjectionStatus.SetResourceReference(TextBlock.ForegroundProperty, "SilverLight");
                         }
                     });
                 });
@@ -561,12 +563,14 @@ namespace RblxExecutorUI
             catch (Exception ex)
             {
                 ShowNotification("Attach Exception", true);
-                App.LogException(ex, "Attach_Click");
+                if (!_closed) App.LogException(ex, "Attach_Click");
             }
+            finally { _isAttaching = false; }
         }
 
         private void ToggleConsole_Checked(object sender, RoutedEventArgs e)
         {
+            if (IsStreamMode) return;
             var handle = GetConsoleWindow();
             if (handle == IntPtr.Zero)
             {
